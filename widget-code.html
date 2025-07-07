@@ -1,0 +1,36 @@
+<!-- BookIt Status Widget for Zendesk -->
+<div id="ld-status-widget" style="font-family: sans-serif; border-radius: 8px; padding: 16px; max-width: 350px; margin: 16px auto; box-shadow: 0 2px 8px rgba(0,0,0,0.07); background: #fff;">
+  <div id="ld-status-header" style="font-size: 1.1em; font-weight: bold; margin-bottom: 4px;">Loading BookIt status…</div>
+  <div id="ld-status-desc" style="color: #555;"></div>
+</div>
+<script>
+fetch("https://leandata-status-widget.vercel.app/api/leandata-status")
+  .then(res => res.json())
+  .then(data => {
+    const ongoingIncidents = data.ongoing_incidents || [];
+    const inProgressMaintenances = data.in_progress_maintenances || [];
+    const scheduledMaintenances = data.scheduled_maintenances || [];
+    
+    let header, desc, color;
+    
+    if (ongoingIncidents.length === 0 && inProgressMaintenances.length === 0) {
+      header = "BookIt is fully operational";
+      desc = "We are not aware of any issues affecting BookIt at this time.";
+      color = "#2ecc40";
+    } else {
+      const issues = [...ongoingIncidents, ...inProgressMaintenances];
+      header = issues.length > 0 ? issues[0].title || "BookIt System Issues" : "BookIt System Issues";
+      desc = issues.length > 0 ? issues[0].message || "There may be issues affecting BookIt." : "There may be issues affecting BookIt.";
+      color = "#ff851b";
+    }
+    
+    document.getElementById("ld-status-header").textContent = header;
+    document.getElementById("ld-status-header").style.color = color;
+    document.getElementById("ld-status-desc").textContent = desc;
+  })
+  .catch(() => {
+    document.getElementById("ld-status-header").textContent = "BookIt Status Unavailable";
+    document.getElementById("ld-status-header").style.color = "#ff4136";
+    document.getElementById("ld-status-desc").textContent = "We are unable to fetch the current BookIt status at this time.";
+  });
+</script>

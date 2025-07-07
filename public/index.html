@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>BookIt Status Widget</title>
+</head>
+<body>
+  <div id="ld-status-widget"></div>
+  <script>
+    fetch("/api/leandata-status")
+      .then(res => res.json())
+      .then(data => {
+        const ongoingIncidents = data.ongoing_incidents || [];
+        const inProgressMaintenances = data.in_progress_maintenances || [];
+        const scheduledMaintenances = data.scheduled_maintenances || [];
+        
+        let header, desc, color;
+        
+        if (ongoingIncidents.length === 0 && inProgressMaintenances.length === 0) {
+          header = "BookIt is fully operational";
+          desc = "We are not aware of any issues affecting BookIt at this time.";
+          color = "#2ecc40";
+        } else {
+          const issues = [...ongoingIncidents, ...inProgressMaintenances];
+          header = issues.length > 0 ? issues[0].title || "BookIt System Issues" : "BookIt System Issues";
+          desc = issues.length > 0 ? issues[0].message || "There may be issues affecting BookIt." : "There may be issues affecting BookIt.";
+          color = "#ff851b";
+        }
+        
+        document.getElementById("ld-status-widget").innerHTML =
+          `<div style="font-family:sans-serif;border-radius:8px;padding:16px;max-width:350px;margin:16px auto;box-shadow:0 2px 8px rgba(0,0,0,0.07);background:#fff;">
+            <div style="font-size:1.1em;font-weight:bold;margin-bottom:4px;color:${color};">${header}</div>
+            <div style="color:#555;">${desc}</div>
+          </div>`;
+      })
+      .catch(() => {
+        document.getElementById("ld-status-widget").innerHTML =
+          `<div style="font-family:sans-serif;border-radius:8px;padding:16px;max-width:350px;margin:16px auto;box-shadow:0 2px 8px rgba(0,0,0,0.07);background:#fff;">
+            <div style="font-size:1.1em;font-weight:bold;margin-bottom:4px;color:#ff4136;">BookIt Status Unavailable</div>
+            <div style="color:#555;">We are unable to fetch the current BookIt status at this time.</div>
+          </div>`;
+      });
+  </script>
+</body>
+</html>
